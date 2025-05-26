@@ -24,6 +24,8 @@ app.use(express.json())
 //route
 app.use('/api/auth',authRoutes)
 
+//test soi from main
+
 //connect Database
 const start = async()=>{
   try {
