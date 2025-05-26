@@ -1,0 +1,34 @@
+# node modules
+node_modules/
+**/node_modules/
+
+# environment files
+.env
+.env.*.local
+.env.local
+
+# build output
+dist/
+build/
+.vite/
+.next/
+out/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pnpm-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
