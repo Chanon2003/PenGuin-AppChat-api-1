@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema({
     type:Boolean,
     default:false
   },
+  accessToken:{
+    type:String,
+    required:false,
+  },
+  refreshToken:{
+    type:String,
+    required:false,
+  },
 });
 
 userSchema.pre("save",async function (next) {
