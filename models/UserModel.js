@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     type:String,
     required:false,
   },
+  imagePublicId:{
+    type:String,
+    required:false,
+  },
   color:{
     type:Number,
     required:false

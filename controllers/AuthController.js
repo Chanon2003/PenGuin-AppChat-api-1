@@ -1,6 +1,7 @@
 import { createCustomError } from "../errors/custom-error.js";
 import asyncWrapper from "../middlewares/asyncWapper.js";
 import User from "../models/UserModel.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.js";
 import generatedAccessToken from "../utils/generateAccessToken.js";
 import generatedRefreshToken from "../utils/generateRefreshToken.js";
 import { maxAge } from "../utils/maxage.js";
@@ -202,5 +203,46 @@ export const updateProfile = asyncWrapper(async (req, res, next) => {
     color: userData.color,
   })
 });
+
+export const addProfileImage = asyncWrapper(async (req, res, next) => {
+  if (!req.file) {
+    return next(createCustomError('Image file is required', 400));
+  }
+
+  const folderType = req.body.folderType || 'profile';
+
+  const result = await uploadToCloudinary(req.file.buffer, folderType);
+  
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.userId,
+    {
+      image: result.secure_url,
+      imagePublicId: result.public_id,
+    },
+    { new: true, runValidators: true }
+  );
+
+  return res.status(200).json({
+    message: 'Image uploaded successfully',
+    image: updatedUser.image,
+  });
+});
+
+export const deleteProfileImage = asyncWrapper(async (req, res, next) => {
+  const user = await User.findById(req.user.userId);
+  if (!user || !user.imagePublicId) {
+    return next(createCustomError('No image to delete', 404));
+  }
+
+  await deleteFromCloudinary(user.imagePublicId);
+
+  user.image = '';
+  user.imagePublicId = '';
+  await user.save();
+
+  res.status(200).json({ message: 'Image deleted successfully' });
+});
+
+
 
 
