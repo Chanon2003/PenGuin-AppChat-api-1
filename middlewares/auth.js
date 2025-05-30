@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import asyncWrapper from './asyncWapper';
-import { createCustomError } from '../errors/custom-error';
+import asyncWrapper from './asyncWapper.js';
+import { createCustomError } from '../errors/custom-error.js';
 
 const auth = asyncWrapper(async (req, res, next) => {
   const token =
@@ -20,7 +20,7 @@ const auth = asyncWrapper(async (req, res, next) => {
     return next(createCustomError("Unauthorized: Invalid or expired token", 401));
   }
 
-  if (!decode?.id) {
+  if (!decode?.userId) {
     return next(createCustomError("Unauthorized: Invalid token payload", 401));
   }
 

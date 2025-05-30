@@ -44,8 +44,9 @@ export const login = asyncWrapper(async (req, res, next) => {
   }
 
   const comparePassword = await bcrypt.compare(password, user.password);
+
   if (!comparePassword) {
-    return next(createCustomError("Password is not correct", 401))
+    return next(createCustomError("Password is not correct", 401)); // ✅ ต้องมี return!
   }
 
   const cookiesOption = {
@@ -56,11 +57,11 @@ export const login = asyncWrapper(async (req, res, next) => {
   };
 
   const refreshTokenOptions = {
-  maxAge: 1000 * 60 * 60 * 24 * 7, // 7 วัน
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: 'None',
-};
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 วัน
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: 'None',
+  };
 
   const accessToken = generatedAccessToken(email, user.id)
   const refreshToken = generatedRefreshToken(user.id)
@@ -112,7 +113,7 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
   const newAccessToken = generatedAccessToken(user.email, user.id);
 
   const cookieOptions = {
-    maxAge, 
+    maxAge,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "None",
@@ -129,4 +130,77 @@ export const refreshToken = asyncWrapper(async (req, res, next) => {
     },
   });
 });
+
+export const userLogout = asyncWrapper(async (req, res, next) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    return next(createCustomError("Unauthorized: Missing user id", 401));
+  }
+
+  const cookiesOption = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'None',
+    path: '/', // 🔸 สำคัญ
+  };
+
+  // 🔸 ล้าง cookie ฝั่ง client
+  res.clearCookie('accessToken', cookiesOption);
+  res.clearCookie('refreshToken', cookiesOption);
+
+  // 🔸 ล้าง refresh_token ใน database (ถ้ามีการเก็บไว้)
+  const removeRefreshToken = await User.updateOne(
+    { _id: userId },
+    { $set: { refresh_token: "" } }
+  );
+
+  if (removeRefreshToken.modifiedCount === 0) {
+    console.warn("No refresh_token was cleared. Already empty?");
+  }
+
+  return res.json({
+    message: "Logout successfully",
+    error: false,
+    success: true,
+  });
+});
+
+export const userInfo = asyncWrapper(async (req, res, next) => {
+  const id = req.user.userId
+  const userData = await User.findById(id)
+
+  return res.status(200).json({
+    id: userData.id,
+    email: userData.email,
+    profileSetup: userData.profileSetup,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    image: userData.image,
+    color: userData.color,
+  })
+});
+
+export const updateProfile = asyncWrapper(async (req, res, next) => {
+  const id = req.user.userId;
+  const { firstName, lastName, color } = req.body;
+  if (!firstName || !lastName || color === undefined) {
+    return next(createCustomError("Firsname lastname and color is required", 400));
+  }
+
+  const userData = await User.findByIdAndUpdate(id, {
+    firstName, lastName, color, profileSetup: true
+  }, { new: true, runValidators: true })
+
+  return res.status(200).json({
+    id: userData.id,
+    email: userData.email,
+    profileSetup: userData.profileSetup,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    image: userData.image,
+    color: userData.color,
+  })
+});
+
 
