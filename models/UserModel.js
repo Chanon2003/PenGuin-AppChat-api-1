@@ -1,4 +1,4 @@
-import { genSalt } from "bcrypt";
+import { genSalt, hash } from "bcrypt";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema({
   profileSetup:{
     type:Boolean,
     default:false
+  },
+  accessToken:{
+    type:String,
+    required:false,
+  },
+  refreshToken:{
+    type:String,
+    required:false,
   },
 });
 
