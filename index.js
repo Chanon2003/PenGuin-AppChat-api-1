@@ -4,8 +4,11 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import connectDB from './db/connect.js'
 import errorHandlerMiddleware from './middlewares/error-handler.js'
-import authRoutes from './routes/AuthRoutes.js'
-import contactRoutes from './routes/ContactRoute.js'
+
+import authRoute from './routes/AuthRoute.js'
+import contactRoute from './routes/ContactRoute.js'
+import messagesRoute from './routes/MessagesRoute.js'
+
 import setupSocket from './socket.js'
 dotenv.config();
 const port = process.env.PORT || 3001
@@ -23,8 +26,9 @@ app.use(cookieParser());
 app.use(express.json());
 
 //route
-app.use('/api/auth',authRoutes)
-app.use('/api/contacts',contactRoutes)
+app.use('/api/auth',authRoute)
+app.use('/api/contacts',contactRoute)
+app.use('/api/messages',messagesRoute)
 
 
 //connect Database
