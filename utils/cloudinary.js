@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 import dotenv from 'dotenv';
+import mime from 'mime-types'; // npm install mime-types
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ export const uploadToCloudinary = (buffer, folder = 'default') => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: `RealTimeAppChat87/${folder}`,
-        resource_type: 'image',
+        resource_type: 'auto',
       },
       (error, result) => {
         if (error) return reject(error);
@@ -25,6 +26,24 @@ export const uploadToCloudinary = (buffer, folder = 'default') => {
     streamifier.createReadStream(buffer).pipe(stream);
   });
 };
+
+export const uploadToCloudinaryRaw = (buffer, folder = 'default', publicId = undefined) => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      folder: `RealTimeAppChat87/${folder}`,
+      resource_type: 'raw',
+    };
+    if (publicId) options.public_id = publicId;
+
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
 
 export const deleteFromCloudinary = (publicId) => {
   return new Promise((resolve, reject) => {

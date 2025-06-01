@@ -8,6 +8,7 @@ import errorHandlerMiddleware from './middlewares/error-handler.js'
 import authRoute from './routes/AuthRoute.js'
 import contactRoute from './routes/ContactRoute.js'
 import messagesRoute from './routes/MessagesRoute.js'
+import channelRoute from './routes/ChannelRoute.js'
 
 import setupSocket from './socket.js'
 dotenv.config();
@@ -29,7 +30,7 @@ app.use(express.json());
 app.use('/api/auth',authRoute)
 app.use('/api/contacts',contactRoute)
 app.use('/api/messages',messagesRoute)
-
+app.use('/api/channels',channelRoute)
 
 //connect Database
 const start = async()=>{
