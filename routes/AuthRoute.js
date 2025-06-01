@@ -3,7 +3,6 @@ import { addProfileImage, deleteProfileImage, login, refreshToken, signup, updat
 import auth from "../middlewares/auth.js";
 import { upload } from "../middlewares/multer.js";
 
-
 const authRoutes = Router();
 
 authRoutes.post('/signup',signup);

@@ -32,7 +32,6 @@ export const searchContacts = asyncWrapper(async (req, res, next) => {
 
 export const getContactsForDMList = asyncWrapper(async (req, res, next) => {
   let { userId } = req.user;
-  console.log(userId);
   userId = new mongoose.Types.ObjectId(userId);
 
   const contacts = await Message.aggregate([

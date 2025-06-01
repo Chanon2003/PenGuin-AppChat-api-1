@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 import dotenv from 'dotenv';
-import mime from 'mime-types'; // npm install mime-types
 
 dotenv.config();
 
@@ -43,7 +42,6 @@ export const uploadToCloudinaryRaw = (buffer, folder = 'default', publicId = und
     streamifier.createReadStream(buffer).pipe(stream);
   });
 };
-
 
 export const deleteFromCloudinary = (publicId) => {
   return new Promise((resolve, reject) => {

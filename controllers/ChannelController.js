@@ -42,3 +42,20 @@ export const getUserChannels = asyncWrapper(async (req, res, next) => {
 
   return res.status(201).json({ channels });
 })
+
+export const getChannelMessages= asyncWrapper(async (req, res, next) => {
+  const {channelId} = req.params;
+
+  const channel = await Channel.findById(channelId).populate({
+    path:'messages',
+    populate:{
+      path:'sender',
+      select:'firstName lastName email _id image color',
+    },
+  })
+  if(!channel){
+    return next(createCustomError("Channel not found.",404))
+  }
+  const messages = channel.messages;
+  return res.status(201).json({ messages });
+})

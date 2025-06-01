@@ -2,6 +2,7 @@ import { createCustomError } from "../errors/custom-error.js";
 import asyncWrapper from "../middlewares/asyncWapper.js";
 import Message from "../models/MessageModel.js";
 import { uploadToCloudinary, uploadToCloudinaryRaw } from "../utils/cloudinary.js";
+import path from 'path';
 
 export const getMessages = asyncWrapper(async (req, res, next) => {
   const user1 = req.user.userId;
@@ -20,23 +21,6 @@ export const getMessages = asyncWrapper(async (req, res, next) => {
 
   return res.status(200).json({ messages });
 })
-
-// export const uploadFile = asyncWrapper(async (req, res, next) => {
-//   if(!req.file){
-//     return next(createCustomError("File is required", 400));
-//   }
-//   console.log('soi',req.file)
-
-//     const folderType = req.body.folderType || 'chat';
-
-//     const result = await uploadToCloudinary(req.file.buffer, folderType);
-
-//   // return console.log('req result',result)
-
-//   return res.status(200).json({filePath:result.secure_url,filePublicId:result.public_id})
-// })
-
-import path from 'path';
 
 export const uploadFile = asyncWrapper(async (req, res, next) => {
   if (!req.file) {
@@ -72,41 +56,6 @@ export const uploadFile = asyncWrapper(async (req, res, next) => {
   });
 });
 
-
-// export const uploadFile = asyncWrapper(async (req, res, next) => {
-//   if (!req.file) {
-//     return next(createCustomError("File is required", 400));
-//   }
-
-//   const folderType = req.body.folderType || 'chat';
-
-//   // ดึงนามสกุลไฟล์
-//   const ext = path.extname(req.file.originalname); // เช่น ".pdf"
-//   // ชื่อไฟล์ไม่มีนามสกุล
-//   const fileName = path.basename(req.file.originalname, ext);
-//   // ตั้งชื่อไฟล์แบบไม่ซ้ำ
-//   const publicId = `${folderType}/${fileName}-${Date.now()}`;
-
-//   let result;
-
-//   if (req.file.mimetype.startsWith('image')) {
-//     result = await uploadToCloudinary(req.file.buffer, folderType);
-//   } else if (
-//     ['application/zip', 'application/x-zip-compressed', 'application/pdf', 'text/plain'].includes(req.file.mimetype)
-//   ) {
-//     // อัปโหลดแบบ raw และตั้งชื่อ publicId
-//     result = await uploadToCloudinaryRaw(req.file.buffer, folderType, publicId);
-//   } else {
-//     result = await uploadToCloudinary(req.file.buffer, folderType);
-//   }
-
-//   return res.status(200).json({
-//     filePath: result.secure_url,
-//     publicId: result.public_id, // ส่งกลับแค่ publicId
-//   });
-// });
-
-
 export const getSignedDownloadUrl = asyncWrapper(async (req, res, next) => {
   const { publicId, resourceType = 'raw' } = req.query;
 
@@ -123,3 +72,18 @@ export const getSignedDownloadUrl = asyncWrapper(async (req, res, next) => {
 
   return res.status(200).json({ url: signedUrl });
 });
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+
+    const deleted = await Message.findByIdAndDelete(messageId);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    res.status(200).json({ message: 'Message deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting message', error });
+  }
+};

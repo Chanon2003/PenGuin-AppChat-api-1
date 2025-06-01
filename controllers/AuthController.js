@@ -9,7 +9,12 @@ import { maxAge } from "../utils/maxage.js";
 import bcrypt from "bcrypt";
 
 export const signup = asyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  email = email.toLowerCase()
+  
+  if (password.length < 8 || !/[a-zA-Z]/.test(password)) {
+    return next(createCustomError('Password must be at least 8 characters long and contain at least one letter', 400));
+  }
 
   if (!email || !password) {
     return next(createCustomError('Email and Password are required', 400));
@@ -33,8 +38,9 @@ export const signup = asyncWrapper(async (req, res, next) => {
 });
 
 export const login = asyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
-
+  let { email, password } = req.body;
+  email = email.toLowerCase()
+  
   if (!email || !password) {
     return next(createCustomError('Email and Password are required', 400));
   }
