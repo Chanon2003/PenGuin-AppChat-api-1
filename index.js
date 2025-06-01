@@ -4,8 +4,13 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import connectDB from './db/connect.js'
 import errorHandlerMiddleware from './middlewares/error-handler.js'
-import authRoutes from './routes/AuthRoutes.js'
 
+import authRoute from './routes/AuthRoute.js'
+import contactRoute from './routes/ContactRoute.js'
+import messagesRoute from './routes/MessagesRoute.js'
+import channelRoute from './routes/ChannelRoute.js'
+
+import setupSocket from './socket.js'
 dotenv.config();
 const port = process.env.PORT || 3001
 
@@ -19,23 +24,20 @@ app.use(cors({
 }))
 
 app.use(cookieParser());
-app.use(express.json())
+app.use(express.json());
 
 //route
-app.use('/api/auth',authRoutes)
-
-
-//Test soi na1 jak righthand1
-//test soi from righthand2
-
-//git fetch from main
+app.use('/api/auth',authRoute)
+app.use('/api/contacts',contactRoute)
+app.use('/api/messages',messagesRoute)
+app.use('/api/channels',channelRoute)
 
 //connect Database
 const start = async()=>{
   try {
     await connectDB(process.env.DATABASE_URL)
   } catch (error) {
-    console.log(error)
+    (error)
   }
 }
 
@@ -47,4 +49,5 @@ const server = app.listen(port,()=>{
   console.log(`Server is Running ON Port : ${port}`)
 })
 
+setupSocket(server)
 

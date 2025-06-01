@@ -1,6 +1,7 @@
 import { createCustomError } from "../errors/custom-error.js";
 import asyncWrapper from "../middlewares/asyncWapper.js";
 import User from "../models/UserModel.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary.js";
 import generatedAccessToken from "../utils/generateAccessToken.js";
 import generatedRefreshToken from "../utils/generateRefreshToken.js";
 import { maxAge } from "../utils/maxage.js";
@@ -8,7 +9,12 @@ import { maxAge } from "../utils/maxage.js";
 import bcrypt from "bcrypt";
 
 export const signup = asyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  email = email.toLowerCase()
+  
+  if (password.length < 8 || !/[a-zA-Z]/.test(password)) {
+    return next(createCustomError('Password must be at least 8 characters long and contain at least one letter', 400));
+  }
 
   if (!email || !password) {
     return next(createCustomError('Email and Password are required', 400));
@@ -32,8 +38,9 @@ export const signup = asyncWrapper(async (req, res, next) => {
 });
 
 export const login = asyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
-
+  let { email, password } = req.body;
+  email = email.toLowerCase()
+  
   if (!email || !password) {
     return next(createCustomError('Email and Password are required', 400));
   }
@@ -202,5 +209,46 @@ export const updateProfile = asyncWrapper(async (req, res, next) => {
     color: userData.color,
   })
 });
+
+export const addProfileImage = asyncWrapper(async (req, res, next) => {
+  if (!req.file) {
+    return next(createCustomError('Image file is required', 400));
+  }
+
+  const folderType = req.body.folderType || 'profile';
+
+  const result = await uploadToCloudinary(req.file.buffer, folderType);
+  
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.userId,
+    {
+      image: result.secure_url,
+      imagePublicId: result.public_id,
+    },
+    { new: true, runValidators: true }
+  );
+
+  return res.status(200).json({
+    message: 'Image uploaded successfully',
+    image: updatedUser.image,
+  });
+});
+
+export const deleteProfileImage = asyncWrapper(async (req, res, next) => {
+  const user = await User.findById(req.user.userId);
+  if (!user || !user.imagePublicId) {
+    return next(createCustomError('No image to delete', 404));
+  }
+
+  await deleteFromCloudinary(user.imagePublicId);
+
+  user.image = '';
+  user.imagePublicId = '';
+  await user.save();
+
+  res.status(200).json({ message: 'Image deleted successfully' });
+});
+
+
 
 
