@@ -70,7 +70,6 @@
 
 ### 2. 🔹 Chat 1-1
 เลือก ผู้ใช้ที่ต้องการแชท แบบ 1-1
-![enter image description here](https://cdn.discordapp.com/attachments/1078550032820736083/1358431954042749158/image.png?ex=67f3d1d8&is=67f28058&hm=4fe42a219fbe43f2d0ebe16c5308100fc4a2b3288820e8005bfc96e73bed4d66&)
 
 ### 3. 🔹Chat group
 
